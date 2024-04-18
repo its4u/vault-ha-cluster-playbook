@@ -1,0 +1,68 @@
+---
+- name: Install vault
+  shell: |
+    sudo yum install -y yum-utils
+    sudo yum-config-manager --add-repo https://rpm.releases.hashicorp.com/RHEL/hashicorp.repo
+    sudo yum -y install vault
+
+- name: SCP the SSL cert to /opt/vault/tls
+  copy:
+    src: "{{ vault_tls_cert_path }}"
+    dest: /opt/vault/tls/vault-cert.pem
+  when: not tls_disabled
+
+- name: SCP the SSL key to /opt/vault/tls
+  copy:
+    src: "{{ vault_tls_key_path }}"
+    dest: /opt/vault/tls/vault-key.pem
+  when: not tls_disabled
+
+- name: SCP the SSL CA cert to /opt/vault/tls
+  copy:
+    src: "{{ vault_tls_ca_cert_path }}"
+    dest: /opt/vault/tls/vault-ca.pem
+  when: not tls_disabled
+
+- name: Set the required permissions to the SSL files
+  shell: |
+    sudo chown root:root /opt/vault/tls/vault-cert.pem /opt/vault/tls/vault-ca.pem
+    sudo chown root:vault /opt/vault/tls/vault-key.pem
+    sudo chmod 0644 /opt/vault/tls/vault-cert.pem /opt/vault/tls/vault-ca.pem
+    sudo chmod 0640 /opt/vault/tls/vault-key.pem
+  when: not tls_disabled
+
+- name: Configure Vault
+  template:
+    src: templates/vault.hcl.j2
+    dest: /etc/vault.d/vault.hcl
+
+- name: Add vault environment variables to /etc/vault.d/vault.env
+  copy:
+    content: |
+      export VAULT_CACERT="/opt/vault/tls/vault-ca.pem"
+      export VAULT_SKIP_VERIFY=1
+    dest: /etc/vault.d/vault.env
+
+- name: Allow ports 8200 and 8201 through the firewall
+  shell: |
+    sudo firewall-cmd --add-port=8200/tcp --permanent
+    sudo firewall-cmd --add-port=8201/tcp --permanent
+    sudo firewall-cmd --reload
+
+- name: Init Vault 0 and save the recovery keys
+  command: vault operator init
+  register: vault_recovery_keys
+  when: groups.nodes.index(inventory_hostname) == 0
+
+- name: Display the recovery keys
+  delegate_to: localhost 
+  debug:
+    msg: "{{ vault_recovery_keys.stdout }}"
+  when: groups.nodes.index(inventory_hostname) == 0
+
+- name: Save the recovery keys to recovery_keys.txt in the current directory
+  delegate_to: localhost
+  copy:
+    content: "{{ vault_recovery_keys.stdout }}"
+    dest: recovery_keys.txt
+  when: groups.nodes.index(inventory_hostname) == 0
