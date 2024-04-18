@@ -1,0 +1,16 @@
+load_balancer:
+  hosts:
+    vault-workshop.its4u-group.com:
+      ansible_user: root
+      ansible_password: ""
+nodes:
+  hosts:
+    vault-workshop-0.its4u-group.com:
+      ansible_user: root
+      ansible_password: ""
+    vault-workshop-1.its4u-group.com:
+      ansible_user: root
+      ansible_password: ""
+    vault-workshop-2.its4u-group.com:
+      ansible_user: root
+      ansible_password: ""
