@@ -1,3 +1,4 @@
+---
 load_balancer:
   hosts:
     vault-workshop.its4u-group.com:
