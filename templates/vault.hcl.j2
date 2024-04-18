@@ -16,7 +16,7 @@ listener "tcp" {
 
 {% if vault_autounseal %}
 seal "transit" {
-  address = "https://{{vault_unsealer_url}}"
+  address = "{{vault_unsealer_url}}"
   token = "{{vault_unsealer_token}}"
   disable_renewal = "false"
   key_name = "autounseal"
