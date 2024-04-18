@@ -55,7 +55,7 @@
     sudo systemctl start vault.service
 
 - name: Init Vault 0 and save the {{"recovery" if vault_autounseal else "unseal"}} keys
-  command: vault operator init
+  command: vault operator init -tls-skip-verify
   register: vault_keys
   when: groups.nodes.index(inventory_hostname) == 0
 
