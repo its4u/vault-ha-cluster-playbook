@@ -54,20 +54,20 @@
     sudo systemctl enable vault.service
     sudo systemctl start vault.service
 
-- name: Init Vault 0 and save the recovery keys
+- name: Init Vault 0 and save the {{"recovery" if vault_autounseal else "unseal"}} keys
   command: vault operator init
-  register: vault_recovery_keys
+  register: vault_keys
   when: groups.nodes.index(inventory_hostname) == 0
 
-- name: Display the recovery keys
+- name: Display the {{"recovery" if vault_autounseal else "unseal"}} keys
   delegate_to: localhost 
   debug:
-    msg: "{{ vault_recovery_keys.stdout }}"
+    msg: "{{ vault_keys.stdout }}"
   when: groups.nodes.index(inventory_hostname) == 0
 
-- name: Save the recovery keys to recovery_keys.txt in the current directory
+- name: Save the {{"recovery" if vault_autounseal else "unseal"}} keys to keys.txt in the current directory
   delegate_to: localhost
   copy:
-    content: "{{ vault_recovery_keys.stdout }}"
-    dest: recovery_keys.txt
+    content: "{{ vault_keys.stdout }}"
+    dest: keys.txt
   when: groups.nodes.index(inventory_hostname) == 0
