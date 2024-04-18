@@ -21,6 +21,12 @@
     name: haproxy
     state: present
 
+
+- name: Touch required http files
+  shell: |
+    touch /etc/firewalld/services/haproxy-http.xml
+    touch /etc/firewalld/services/haproxy-https.xml
+
 - name: Create HAProxy HTTP config file
   shell: |
     cat /etc/firewalld/services/haproxy-http.xml <<EOF
