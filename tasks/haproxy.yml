@@ -72,4 +72,3 @@
   shell: |
     systemctl start haproxy
     systemctl enable haproxy
-
