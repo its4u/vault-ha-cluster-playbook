@@ -1,6 +1,7 @@
 ---
 - name: Deploy Vault
-  vars_file: settings.yml
+  vars_files: 
+    - settings.yml
   tasks:
     - name: Deploy Load Balancer
       hosts: loadbalancer
