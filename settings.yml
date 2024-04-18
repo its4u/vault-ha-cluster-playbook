@@ -1,7 +1,10 @@
 ---
 tls_disabled: false
-load_balancer_tls_cert_path: ""
-load_balancer_tls_key_path: ""
-vault_tls_cert_path: ""
-vault_tls_key_path: ""
-vault_tls_ca_cert_path: ""
+load_balancer_tls_cert_path: "<LB_CERT_PATH>"
+load_balancer_tls_key_path: "<LB_KEY_PATH>"
+vault_tls_cert_path: "<VAULT_CERT_PATH>"
+vault_tls_key_path: "<VAULT_KEY_PATH>"
+vault_tls_ca_cert_path: "<VAULT_CA_CERT_PATH>"
+vault_autounseal: true
+vault_unsealer_url: "<UNSEALER_FQDN>"
+vault_unsealer_token: "<UNSEALER_TOKEN>"
