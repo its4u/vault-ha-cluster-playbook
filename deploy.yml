@@ -1,0 +1,11 @@
+---
+- name: Deploy Vault
+  vars_file: settings.yml
+  tasks:
+    - name: Deploy Load Balancer
+      hosts: loadbalancer
+      include_tasks: tasks/haproxy.yml
+
+    - name: Deploy Vault
+      hosts: nodes
+      include_tasks: tasks/vault.yml
