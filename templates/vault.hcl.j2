@@ -1,0 +1,41 @@
+cluster_addr  = "https://{{inventory_hostname}}:8201"
+api_addr      = "https://{{inventory_hostname}}:8200"
+disable_mlock = true
+ui = true
+
+listener "tcp" {
+  address            = "0.0.0.0:8200"
+  {% if tls_disabled %}
+  tls_disable        = 1
+  {% else %}
+  tls_cert_file      = "/opt/vault/tls/vault-cert.pem"
+  tls_key_file       = "/opt/vault/tls/vault-key.pem"
+  tls_client_ca_file = "/opt/vault/tls/vault-ca.pem"
+  {% endif %}
+}
+
+{% if vault_autounseal %}
+seal "transit" {
+  address = "https://{{vault_unsealer_url}}"
+  token = "{{vault_unsealer_token}}"
+  disable_renewal = "false"
+  key_name = "autounseal"
+  mount_path = "transit/"
+}
+{%endif%}
+
+storage "raft" {
+  path    = "/opt/vault/data"
+  
+  node_id = "node-{{groups.nodes.index(inventory_hostname)}}"
+
+  {% for node in groups.nodes %}
+  retry_join {
+    leader_tls_servername   = "{{node}}"
+    leader_api_addr         = "https://{{node}}:8200"
+    leader_ca_cert_file     = "/opt/vault/tls/vault-ca.pem"
+    leader_client_cert_file = "/opt/vault/tls/vault-cert.pem"
+    leader_client_key_file  = "/opt/vault/tls/vault-key.pem"
+  }
+  {% endfor %}
+}
