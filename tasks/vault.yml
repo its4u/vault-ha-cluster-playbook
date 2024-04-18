@@ -49,6 +49,11 @@
     sudo firewall-cmd --add-port=8201/tcp --permanent
     sudo firewall-cmd --reload
 
+- name: Start and enable the vault service
+  shell: |
+    sudo systemctl enable vault.service
+    sudo systemctl start vault.service
+
 - name: Init Vault 0 and save the recovery keys
   command: vault operator init
   register: vault_recovery_keys
