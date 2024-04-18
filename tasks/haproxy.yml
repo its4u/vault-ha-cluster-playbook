@@ -1,4 +1,9 @@
 ---
+- name: Install HAProxy
+  yum:
+    name: haproxy
+    state: present
+
 - name: SCP SSL cert to LB at /etc/ssl/private
   copy:
     src: "{{ load_balancer_tls_cert_path }}"
