@@ -2,15 +2,15 @@ load_balancer:
   hosts:
     vault-workshop.its4u-group.com:
       ansible_user: root
-      ansible_password: ""
+      ansible_ssh_private_key_file: ""
 nodes:
   hosts:
     vault-workshop-0.its4u-group.com:
       ansible_user: root
-      ansible_password: ""
+      ansible_ssh_private_key_file: ""
     vault-workshop-1.its4u-group.com:
       ansible_user: root
-      ansible_password: ""
+      ansible_ssh_private_key_file: ""
     vault-workshop-2.its4u-group.com:
       ansible_user: root
-      ansible_password: ""
+      ansible_ssh_private_key_file: ""
