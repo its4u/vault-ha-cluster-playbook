@@ -1,0 +1,70 @@
+---
+- name: SCP SSL cert to LB at /etc/ssl/private
+  copy:
+    src: "{{ load_balancer_tls_cert_path }}"
+    dest: /etc/ssl/private/vault.crt
+  when: not tls_disabled
+
+- name: SCP SSL key to LB at /etc/ssl/private
+  copy:
+    src: "{{ load_balancer_tls_key_path }}"
+    dest: /etc/ssl/private/vault.key
+  when: not tls_disabled
+
+- name: Install HAProxy
+  yum:
+    name: haproxy
+    state: present
+
+- name: Create HAProxy HTTP config file
+  shell: |
+    cat /etc/firewalld/services/haproxy-http.xml <<EOF
+    <?xml version="1.0" encoding="utf-8"?>
+    <service>
+    <short>Vault</short>
+    <description>Vault LB</description>
+    <port protocol="tcp" port="80"/>
+    </service>
+    EOF
+
+    restorecon /etc/firewalld/services/haproxy-http.xml
+    chmod 640 /etc/firewalld/services/haproxy-http.xml
+
+- name: Configure HAProxy HTTPS config
+  shell: |
+    cat /etc/firewalld/services/haproxy-https.xml <<EOF
+    <?xml version="1.0" encoding="utf-8"?>
+    <service>
+    <short>Vault</short>
+    <description>Vault LB</description>
+    <port protocol="tcp" port="443"/>
+    </service>
+    EOF
+
+    restorecon /etc/firewalld/services/haproxy-https.xml
+    chmod 640 /etc/firewalld/services/haproxy-https.xml
+  when: not tls_disabled
+
+- name: Create PEM cert and set permissions
+  shell: |
+    cat /etc/ssl/private/vault.crt /etc/ssl/private/vault.key > /etc/ssl/private/vault.pem
+    chmod 600 /etc/ssl/private/{vault.pem,vault.crt,vault.key}
+  when: not tls_disabled
+
+- name: Configure HAProxy
+  template:
+    src: haproxy.cfg.j2
+    dest: /etc/haproxy/haproxy.cfg
+
+- name: Allow dest port 8200 selinux
+  seport:
+    ports: 8200
+    proto: tcp
+    setype: http_port_t
+    state: present
+
+- name: Start and enable HAProxy
+  shell: |
+    systemctl start haproxy
+    systemctl enable haproxy
+
