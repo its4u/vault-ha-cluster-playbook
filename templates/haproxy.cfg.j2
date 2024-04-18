@@ -26,5 +26,5 @@ backend vault
     http-check send meth GET uri /v1/sys/health
     http-check expect status 200
     {% for node in groups.nodes %}
-    server node{{loop.index0}} {{node}} node:8200 {{"" if tls_disabled else "ssl verify none"}} check
+    server node{{loop.index0}} {{node}}:8200 {{"" if tls_disabled else "ssl verify none"}} check
     {% endfor %}
