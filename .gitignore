@@ -2,3 +2,4 @@
 haproxy.cfg
 .DS_Store
 test.yml
+keys.txt
