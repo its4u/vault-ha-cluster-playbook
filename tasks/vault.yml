@@ -45,6 +45,8 @@
 
 - name: Allow ports 8200 and 8201 through the firewall
   shell: |
+    sudo systemctl start firewalld
+    sudo systemctl enable firewalld
     sudo firewall-cmd --add-port=8200/tcp --permanent
     sudo firewall-cmd --add-port=8201/tcp --permanent
     sudo firewall-cmd --reload
