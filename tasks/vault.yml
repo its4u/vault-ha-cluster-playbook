@@ -39,8 +39,8 @@
 - name: Add vault environment variables to /etc/vault.d/vault.env
   copy:
     content: |
-      export VAULT_CACERT="/opt/vault/tls/vault-ca.pem"
-      export VAULT_SKIP_VERIFY=1
+      VAULT_CACERT="/opt/vault/tls/vault-ca.pem"
+      VAULT_SKIP_VERIFY=1
     dest: /etc/vault.d/vault.env
 
 - name: Allow ports 8200 and 8201 through the firewall
@@ -73,3 +73,8 @@
     content: "{{ vault_keys.stdout }}"
     dest: keys.txt
   when: groups.nodes.index(inventory_hostname) == 0
+
+- name: Disable SWAP
+  shell: |
+    sudo swapoff -a
+    sudo sed -i '/swap/d' /etc/fstab
