@@ -28,7 +28,13 @@
 
 - name: SCP firewalld HAProxy service HTTP config file
   copy:
-    src: files/haproxy-http.xml
+    content: |
+      <?xml version="1.0" encoding="utf-8"?>
+      <service>
+        <short>Vault</short>
+        <description>Vault LB</description>
+        <port protocol="tcp" port="80"/>
+      </service>
     dest: /etc/firewalld/services/haproxy-http.xml
     owner: root
     group: root
@@ -36,7 +42,13 @@
 
 - name: SCP firewalld HAProxy service HTTPS config file
   copy:
-    src: files/haproxy-https.xml
+    content: |
+      <?xml version="1.0" encoding="utf-8"?>
+      <service>
+        <short>Vault</short>
+        <description>Vault LB</description>
+        <port protocol="tcp" port="443"/>
+      </service>
     dest: /etc/firewalld/services/haproxy-https.xml
     owner: root
     group: root
@@ -66,7 +78,20 @@
     setype: http_port_t
     state: present
 
-- name: Start and enable HAProxy
-  shell: |
-    systemctl start haproxy
-    systemctl enable haproxy
+- name: Create logging file configuration for HAProxy
+  copy:
+    content: |
+      local0.* /var/log/haproxy-traffic.log
+      local0.notice /var/log/haproxy-admin.log
+    dest: /etc/rsyslog.d/haproxy.conf
+
+- name: Restart the rsyslog service
+  service:
+    name: rsyslog
+    state: restarted
+
+- name: Start and enable the HAProxy service
+  service:
+    name: haproxy
+    state: started
+    enabled: yes

@@ -1,26 +1,29 @@
+global
+    log 127.0.0.1:514  local0 
+    chroot /var/lib/haproxy
+    user haproxy
+    group haproxy
+    daemon
 defaults
     log global
+    mode http
+    option httplog
+    timeout connect 5s
+    timeout client  50s
+    timeout server  50s
 {% if not tls_disabled %}
 frontend vault_http
-    mode tcp
     bind *:80
     redirect scheme https code 301 if !{ ssl_fc }
 frontend vault_https
-    mode tcp
-    log global
     bind *:443 ssl crt /etc/ssl/private/vault.pem
     default_backend vault
-    option tcplog
 {% else %}
 frontend vault_http
-    mode tcp
-    log global
-    option tcplog
     bind *:80
     default_backend vault
 {% endif %}
 backend vault
-    mode tcp
     option httpchk
     {{"" if tls_disabled else "http-check connect ssl"}}
     http-check send meth GET uri /v1/sys/health
